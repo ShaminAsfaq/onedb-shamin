@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ACE-ing the codes</title>
+    <link rel="stylesheet" href="./css/style.css"></link>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://ajaxorg.github.io/ace-builds/src-min-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+
+
+  <div class="parent">
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">List of Codes</div>
+
+        <!-- List group -->
+        <ul class="list-group" id="codeList">
+            <!-- <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Morbi leo risus</li>
+            <li class="list-group-item">Porta ac consectetur ac</li>
+            <li class="list-group-item">Vestibulum at eros</li> -->
+        </ul>
+    </div>
+    
+    <div class="ace-container">
+      <div id="editor">// code to be loaded..</div>
+      <button id="save-code" type="button" class="btn btn-primary">Save</button>
+    </div>
+    
+  </div>
+
+  <script>
+      var editor = ace.edit("editor");
+      editor.setTheme("ace/theme/monokai");
+      editor.session.setMode("ace/mode/javascript");
+
+
+      const URL = 'https://script.shaminasfaq.repl.co';
+      const GET = `${URL}/get`;
+      const POST = `${URL}/post`;
+      var selectedId = '';
+
+      var foundList = [];
+
+      fetch(GET)
+          .then(data => data.json())
+          .then(res => {
+              foundList = [...foundList, ...res];
+              // console.log(res);
+
+              res.map(item => {
+                $("#codeList").append($(`<li class="list-group-item">${item.id || 'N/A'}</li>`));
+              })
+          });
+
+      $('#save-code').click(() => {
+        const data = { id: selectedId, code: editor.getValue() }
+        fetch(POST, {
+          method: 'POST', // or 'PUT'
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      })
+
+      $(document).on('click', '.list-group-item',  (e) => {
+          var found = foundList.find(item => item.id === e.currentTarget.innerText);
+          selectedId = found?.id;
+          // console.log(typeof e.currentTarget.innerText)
+          editor.setValue(found?.code || `// ${e.currentTarget.innerText}`);
+      });
+
+  </script>
+  </body>
+</html>
