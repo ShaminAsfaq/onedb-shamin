@@ -13,7 +13,8 @@ const myType = {
                 // console.log(item)
                 const methodHeader = item[0];
                 let method = methodHeader.split('onedb.')[1].split('(')[0];
-                let args = methodHeader.split('(')[1].split(')')[0];
+                let args = methodHeader.split('(')[1].split(')')[0].replace(/["']/g, "").split(',')
+                args[1] = args[1].trim()
 
                 const arrayOfLines = item.input.split('\n');
 
